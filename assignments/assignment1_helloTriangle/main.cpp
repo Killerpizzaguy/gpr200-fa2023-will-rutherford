@@ -16,15 +16,17 @@ unsigned int createShaderProgram(const char* vertexShaderSource, const char* fra
 
 
 int main() {
+	//First 3 numbers are location, next 4 are RGBA
 	//0,0 is the center of the window
 	//1,1 is the top right
 	//-1,-1 is the bottom left
-	float vertices[9] = {
-		//x   //y  //z
-		-0.5, -0.5, 0.0, //Left
-		 0.5, -0.5, 0.0, //Right
-		 0.0,  0.5, 0.0  //Top 
+	float vertices[21] = {
+		//x   //y  //z   //r  //g  //b  //a
+		-0.5, -0.5, 0.0, 1.0, 0.0, 0.0, 1.0, //Bottom left
+		 0.5, -0.5, 0.0, 0.0, 1.0, 0.0, 1.0, //Bottom right
+		 0.0,  0.5, 0.0, 0.0, 0.0, 1.0, 1.0  //Top center
 	};
+
 
 	printf("Initializing...");
 	if (!glfwInit()) {
@@ -49,16 +51,23 @@ int main() {
 	const char* vertexShaderSource = R"(
 		#version 450
 		layout(location = 0) in vec3 vPos;
+		layout(location = 1) in vec4 vColor;
+		out vec4 Color;
+		uniform float _Time;
 		void main(){
-		gl_Position = vec4(vPos,1.0);
+			Color = vColor;
+			vec3 offset = vec3(0,sin(vPos.x + _Time),0)*0.5;
+			gl_Position = vec4(vPos + offset,1.0);
 		}
 	)";
 
 	const char* fragmentShaderSource = R"(
 		#version 450
 		out vec4 FragColor;
+		in vec4 Color;
+		uniform float _Time;
 		void main(){
-		FragColor = vec4(1.0);
+			FragColor = Color * abs(sin(_Time));
 		}
 	)";
 
@@ -70,6 +79,14 @@ int main() {
 		glClear(GL_COLOR_BUFFER_BIT);
 		glUseProgram(shader);
 		glBindVertexArray(vao);
+
+		//Get time in seconds
+		float time = (float)glfwGetTime();
+		//Get uniform
+		int timeLocation = glGetUniformLocation(shader, "_Time");
+		//Set unitform
+		glUniform1f(timeLocation, time);
+
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 		glfwSwapBuffers(window);
 	}
@@ -92,9 +109,13 @@ unsigned int MakeVAO(float* vertexData, int vertexNum)
 	//Tell vao to pull vertex data from vbo
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-	//sets position atributes
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, (const void*)0);
+	//Position
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 7, (const void*)0);
 	glEnableVertexAttribArray(0);
+
+	//Color
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 7, (const void*)(sizeof(float) * 3));
+	glEnableVertexAttribArray(1);
 
 	return vao;
 }
