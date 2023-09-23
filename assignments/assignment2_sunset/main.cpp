@@ -46,9 +46,7 @@ unsigned int indices[6] = {
 	2, 3, 0
 };
 
-//float triangleColor[3] = { 1.0f, 0.5f, 0.0f };
-//float triangleBrightness = 1.0f;
-bool showImGUIDemoWindow = true;
+bool showImGUIDemoWindow = false;
 float skyTopColor[3] = { 0.851, 0.447, 0.541 };
 float skyBottomColor[3] = { 0.482, 0.42, 0.969 };
 float topSunColor[3] = { 1, 1, 0.9 };
@@ -84,10 +82,12 @@ int main() {
 	ImGui_ImplOpenGL3_Init();
 
 	wr::Shader shader("assets/vertexShader.vert", "assets/tatooineSunsetShader.frag");
+	//wr::Shader shader("assets/vertexShader.vert", "assets/fragmentShader.frag");
 	unsigned int vao = createVAO(vertices, 4, indices, 6);
 
 	shader.use();
 	glBindVertexArray(vao);
+	shader.setVec3("iResolution", SCREEN_WIDTH, SCREEN_HEIGHT, 1);
 
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
@@ -95,6 +95,7 @@ int main() {
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		//Set uniforms
+		shader.setFloat("iTime", (float)glfwGetTime());
 		shader.setVec3("_SkyTop", skyTopColor[0], skyTopColor[1], skyTopColor[2]);
 		shader.setVec3("_SkyBottom", skyBottomColor[0], skyBottomColor[1], skyBottomColor[2]);
 		shader.setVec3("_TopSunColor", topSunColor[0], topSunColor[1], topSunColor[2]);
@@ -114,8 +115,6 @@ int main() {
 
 			ImGui::Begin("Settings");
 			ImGui::Checkbox("Show Demo Window", &showImGUIDemoWindow);
-			//ImGui::ColorEdit3("Color", triangleColor);
-			//ImGui::SliderFloat("Brightness", &triangleBrightness, 0.0f, 1.0f);
 			ImGui::ColorEdit3("Sky Top Color", skyTopColor);
 			ImGui::ColorEdit3("Sky Bottom Color", skyBottomColor);
 			ImGui::ColorEdit3("Top Sun Color", topSunColor);
