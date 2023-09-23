@@ -10,6 +10,11 @@
 
 #include "wr/shader.h"
 
+struct Vertex {
+	float x, y, z;
+	float u, v;
+};
+
 unsigned int createShader(GLenum shaderType, const char* sourceCode);
 unsigned int createShaderProgram(const char* vertexShaderSource, const char* fragmentShaderSource);
 unsigned int createVAO(Vertex* vertexData, int numVertices, unsigned int* indicesData, int numIndices);
@@ -18,10 +23,7 @@ void framebufferSizeCallback(GLFWwindow* window, int width, int height);
 const int SCREEN_WIDTH = 1080;
 const int SCREEN_HEIGHT = 720;
 
-struct Vertex {
-	float x, y, z;
-	float u, v;
-};
+
 
 //float vertices[12] = {
 //	//x   //y  //z   
@@ -40,8 +42,8 @@ Vertex vertices[4] = {
 };
 
 unsigned int indices[6] = {
-	0, 3, 6,
-	6, 9, 0
+	0, 1, 2,
+	2, 3, 0
 };
 
 float triangleColor[3] = { 1.0f, 0.5f, 0.0f };
@@ -75,7 +77,7 @@ int main() {
 	ImGui_ImplOpenGL3_Init();
 
 	wr::Shader shader("assets/vertexShader.vert", "assets/fragmentShader.frag");
-	unsigned int vao = createVAO(vertices, 4, indices, 2);
+	unsigned int vao = createVAO(vertices, 4, indices, 6);
 
 	shader.use();
 	glBindVertexArray(vao);
@@ -86,8 +88,8 @@ int main() {
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		//Set uniforms
-		shader.setVec3("_Color", triangleColor[0], triangleColor[1], triangleColor[2]);
-		shader.setFloat("_Brightness", triangleBrightness);
+		//shader.setVec3("_Color", triangleColor[0], triangleColor[1], triangleColor[2]);
+		//shader.setFloat("_Brightness", triangleBrightness);
 		
 		/*glDrawArrays(GL_TRIANGLES, 0, 3);
 		glDrawArrays(GL_TRIANGLES, 3, 3);*/
