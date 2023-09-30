@@ -9,6 +9,9 @@
 #include <imgui_impl_opengl3.h>
 
 #include <ew/shader.h>
+#include <wr/texture.h>
+
+//Assignment 3
 
 struct Vertex {
 	float x, y, z;
@@ -58,7 +61,8 @@ int main() {
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init();
 
-	ew::Shader shader("assets/vertexShader.vert", "assets/fragmentShader.frag");
+	ew::Shader backgroundShader("assets/vertexShader.vert", "assets/backgroundTexFragShader.frag");
+	ew::Shader characterShader("assets/vertexShader.vert", "assets/characterTexFragShader.frag");
 
 	unsigned int quadVAO = createVAO(vertices, 4, indices, 6);
 
@@ -69,10 +73,25 @@ int main() {
 		glClearColor(0.3f, 0.4f, 0.9f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		//Set uniforms
-		shader.use();
+		//background shader stuff
+		backgroundShader.use();
+		unsigned int brickTexture = loadTexture("assets/BrickTexture.jpg", GL_REPEAT, GL_LINEAR); //Brick texture from https://unsplash.com/s/photos/brick-texture
+		unsigned int noiseTexture = loadTexture("assets/noiseTexture.png", GL_REPEAT, GL_LINEAR); //Noise texture from https://opengameart.org/content/noise-texture-pack
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, brickTexture);
+
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, noiseTexture);
+
+		backgroundShader.setFloat("iTime", (float)glfwGetTime());
+		backgroundShader.setInt("_BackgroundTexture", 0);
+		backgroundShader.setInt("_NoiseTexture", 1);
 
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, NULL);
+
+		//Character shader stuff
+
 
 		//Render UI
 		{

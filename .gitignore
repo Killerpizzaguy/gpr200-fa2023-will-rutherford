@@ -37,3 +37,4 @@ out/
 build/
 .vs/
 bin-*/
+/noiseTextures

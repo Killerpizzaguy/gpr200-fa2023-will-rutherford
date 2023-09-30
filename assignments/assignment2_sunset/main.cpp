@@ -10,6 +10,8 @@
 
 #include "wr/shader.h"
 
+//Assignment 2
+
 struct Vertex {
 	float x, y, z;
 	float u, v;
