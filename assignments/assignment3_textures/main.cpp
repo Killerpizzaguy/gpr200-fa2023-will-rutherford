@@ -35,6 +35,9 @@ unsigned short indices[6] = {
 	2, 3, 0
 };
 
+float characterX = 0.0f;
+float characterY = 0.0f;
+
 int main() {
 	printf("Initializing...");
 	if (!glfwInit()) {
@@ -98,8 +101,10 @@ int main() {
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, characterTexture);
 
-		backgroundShader.setFloat("iTime", (float)glfwGetTime());
-		backgroundShader.setInt("_Texture", 0);
+		characterShader.setFloat("iTime", (float)glfwGetTime());
+		characterShader.setInt("_Texture", 0);
+		characterShader.setFloat("_X", characterX);
+		characterShader.setFloat("_Y", characterY);
 		
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -113,6 +118,8 @@ int main() {
 			ImGui::NewFrame();
 
 			ImGui::Begin("Settings");
+			ImGui::SliderFloat("X", &characterX, -2.0f, 2.0f);
+			ImGui::SliderFloat("Y", &characterY, -2.0f, 2.0f);
 			ImGui::End();
 
 			ImGui::Render();
