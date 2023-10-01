@@ -54,6 +54,7 @@ int main() {
 		printf("GLAD Failed to load GL headers");
 		return 1;
 	}
+	
 
 	//Initialize ImGUI
 	IMGUI_CHECKVERSION();
@@ -91,7 +92,19 @@ int main() {
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, NULL);
 
 		//Character shader stuff
+		characterShader.use();
+		unsigned int characterTexture = loadTexture("assets/theWorm.png", GL_CLAMP_TO_EDGE, GL_NEAREST);
 
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, characterTexture);
+
+		backgroundShader.setFloat("iTime", (float)glfwGetTime());
+		backgroundShader.setInt("_Texture", 0);
+		
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, NULL);
 
 		//Render UI
 		{
