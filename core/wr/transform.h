@@ -2,6 +2,7 @@
 #pragma once
 #include "../ew/ewMath/mat4.h"
 #include "../ew/ewMath/vec3.h"
+#include "../ew/ewMath/ewMath.h"
 #include <math.h>
 
 namespace wr {
@@ -67,7 +68,7 @@ namespace wr {
 		ew::Vec3 rotation = ew::Vec3(0.0f, 0.0f, 0.0f); //Euler angles (degrees)
 		ew::Vec3 scale = ew::Vec3(1.0f, 1.0f, 1.0f);
 		ew::Mat4 getModelMatrix() const {
-			return Scale(scale) * (RotateZ(rotation.z) * RotateX(rotation.x) * RotateY(rotation.y)) * Translate(position);
+			return Translate(position) * RotateY(ew::Radians(rotation.y)) * RotateX(ew::Radians(rotation.x)) * RotateZ(ew::Radians(rotation.z)) * Scale(scale);
 		}
 	};
 }
