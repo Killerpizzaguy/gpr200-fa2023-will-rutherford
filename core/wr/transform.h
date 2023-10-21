@@ -68,7 +68,61 @@ namespace wr {
 		ew::Vec3 rotation = ew::Vec3(0.0f, 0.0f, 0.0f); //Euler angles (degrees)
 		ew::Vec3 scale = ew::Vec3(1.0f, 1.0f, 1.0f);
 		ew::Mat4 getModelMatrix() const {
-			return Translate(position) * RotateY(ew::Radians(rotation.y)) * RotateX(ew::Radians(rotation.x)) * RotateZ(ew::Radians(rotation.z)) * Scale(scale);
+			return Identity() * Translate(position) * RotateY(ew::Radians(rotation.y)) * RotateX(ew::Radians(rotation.x)) * RotateZ(ew::Radians(rotation.z)) * Scale(scale);
 		}
 	};
+
+	//Creates a right handed view space
+	//eye = eye (camera) position
+	//target = position to look at
+	//up = up axis, usually(0,1,0)
+	inline ew::Mat4 LookAt(ew::Vec3 eye, ew::Vec3 target, ew::Vec3 up) {
+
+		ew::Vec3 f = (eye - target) / ew::Magnitude(eye - target); //I have no idea if this is right lmao
+		ew::Vec3 r = ew::Cross(up, f) / ew::Magnitude(ew::Cross(up, f));
+		ew::Vec3 u = ew::Cross(f, r) / ew::Magnitude(ew::Cross(f, r));
+
+		ew::Mat4 rotation(
+			r.x, r.y, r.z, 0,
+			u.x, u.y, u.z, 0,
+			f.x, f.y, f.z, 0,
+			0, 0, 0, 1
+		);
+
+		ew::Mat4 translation(
+			1, 0, 0, -eye.x,
+			0, 1, 0, -eye.y,
+			0, 0, 1, -eye.z,
+			0, 0, 0, 1
+		);
+
+		return rotation * translation;
+	};
+
+	//Orthographic projection
+	inline ew::Mat4 Orthographic(float height, float aspect, float near, float far) {
+		float top = height / 2;
+		float bottom = -top;
+		float right = (height * aspect) / 2;
+		float left = -right;
+
+		return ew::Mat4(
+			2 / (right - left), 0, 0, -(right + left) / (right - left),
+			0, 2 / (top - bottom), 0, -(top + bottom) / (top - bottom),
+			0, 0, -2 / (far - near), -(far + near) / (far - near),
+			0, 0, 0, 1
+		);
+	};
+
+	//Perspective projection
+	//fov = vertical aspect ratio (radians)
+	inline ew::Mat4 Perspective(float fov, float aspect, float near, float far) {
+		return ew::Mat4(
+			1 / (tan(fov/2)*aspect), 0, 0, 0,
+			0, 1 / tan(fov / 2), 0, 0,
+			0, 0, (near + far)/(near - far), (2*far*near)/(near - far),
+			0, 0, -1, 0
+		);
+	};
+
 }

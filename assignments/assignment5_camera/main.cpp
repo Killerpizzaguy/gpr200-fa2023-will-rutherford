@@ -12,11 +12,23 @@
 #include <ew/procGen.h>
 #include <ew/transform.h>
 
+#include <wr/camera.h>
+
 void framebufferSizeCallback(GLFWwindow* window, int width, int height);
 
 //Projection will account for aspect ratio!
 const int SCREEN_WIDTH = 1080;
 const int SCREEN_HEIGHT = 720;
+
+const float FOV = 60;
+const float ORTHO_HEIGHT = 6;
+const float NEAR_PLANE = 0.1;
+const float FAR_PLANE = 100;
+
+const bool ORTHOGRAPHIC = true;
+
+const ew::Vec3 CAM_START_POS(0, 0, 5);
+const ew::Vec3 LOOK_AT_START_POS(0, 0, 0);
 
 const int NUM_CUBES = 4;
 ew::Transform cubeTransforms[NUM_CUBES];
@@ -66,6 +78,8 @@ int main() {
 		cubeTransforms[i].position.y = i / (NUM_CUBES / 2) - 0.5;
 	}
 
+	wr::Camera cam(CAM_START_POS, LOOK_AT_START_POS, FOV, SCREEN_WIDTH / SCREEN_HEIGHT, NEAR_PLANE, FAR_PLANE, ORTHOGRAPHIC, ORTHO_HEIGHT);
+
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
 		glClearColor(0.3f, 0.4f, 0.9f, 1.0f);
@@ -80,6 +94,9 @@ int main() {
 		{
 			//Construct model matrix
 			shader.setMat4("_Model", cubeTransforms[i].getModelMatrix());
+			//View Projection Matrix
+			shader.setMat4("_ViewProjection", cam.ProjectionMatrix() * cam.ViewMatrix());
+
 			cubeMesh.draw();
 		}
 
@@ -93,8 +110,9 @@ int main() {
 			ImGui::Text("Cubes");
 			for (size_t i = 0; i < NUM_CUBES; i++)
 			{
+				std::string transformHeaderName = "Transform " + std::to_string(i);
 				ImGui::PushID(i);
-				if (ImGui::CollapsingHeader("Transform")) {
+				if (ImGui::CollapsingHeader(transformHeaderName.c_str())) {
 					ImGui::DragFloat3("Position", &cubeTransforms[i].position.x, 0.05f);
 					ImGui::DragFloat3("Rotation", &cubeTransforms[i].rotation.x, 1.0f);
 					ImGui::DragFloat3("Scale", &cubeTransforms[i].scale.x, 0.05f);
@@ -102,6 +120,13 @@ int main() {
 				ImGui::PopID();
 			}
 			ImGui::Text("Camera");
+			ImGui::DragFloat3("Position", &cam.position.x, 0.05f);
+			ImGui::DragFloat3("Look At", &cam.target.x, 0.05f);
+			ImGui::DragFloat("FOV", &cam.fov, 0.05f);
+			ImGui::DragFloat("Near Plane", &cam.nearPlane, 0.05f);
+			ImGui::DragFloat("Far Plane", &cam.farPlane, 0.05f);
+			ImGui::DragFloat("Ortho Size", &cam.orthoSize, 0.05f);
+			ImGui::Checkbox("Orthographic", &cam.orthographic);
 			ImGui::End();
 			
 			ImGui::Render();

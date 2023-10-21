@@ -15,7 +15,7 @@ set(CORE_INC_DIR
  CACHE PATH "CORE INCLUDE SOURCE PATH"
 )
 
-add_library(core STATIC ${CORE_SRC} ${CORE_INC} "wr/transform.h" "wr/transform.cpp")
+add_library(core STATIC ${CORE_SRC} ${CORE_INC} "wr/transform.h" "wr/transform.cpp" "wr/camera.h" "wr/camera.cpp")
 
 find_package(OpenGL REQUIRED)
 
