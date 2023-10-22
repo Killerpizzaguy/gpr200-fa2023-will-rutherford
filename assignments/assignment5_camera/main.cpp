@@ -79,9 +79,18 @@ int main() {
 	}
 
 	wr::Camera cam(CAM_START_POS, LOOK_AT_START_POS, FOV, SCREEN_WIDTH / SCREEN_HEIGHT, NEAR_PLANE, FAR_PLANE, ORTHOGRAPHIC, ORTHO_HEIGHT);
-
+	wr::CameraControls camController;
+	float prevTime = 0;
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
+
+		//Calculate deltaTime
+		float time = (float)glfwGetTime(); //Timestamp of current frame
+		float deltaTime = time - prevTime;
+		prevTime = time;
+
+		wr::moveCamera(window, &cam, &camController, deltaTime);
+		wr::resetCamera(window, &cam, &camController, CAM_START_POS, LOOK_AT_START_POS, 0, 0);
 		glClearColor(0.3f, 0.4f, 0.9f, 1.0f);
 		//Clear both color buffer AND depth buffer
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -143,3 +152,41 @@ void framebufferSizeCallback(GLFWwindow* window, int width, int height)
 	glViewport(0, 0, width, height);
 }
 
+//void moveCamera(GLFWwindow* window, wr::Camera* camera, wr::CameraControls* controls)
+//{
+//	if (!glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_2)) {
+//		//Release cursor
+//		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+//		controls->firstMouse = true;
+//		return;
+//	}
+//	//hides the cursor
+//	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+//
+//	//Get screen mouse position
+//	double mouseX, mouseY;
+//	glfwGetCursorPos(window, &mouseX, &mouseY);
+//
+//	if (controls->firstMouse) {
+//		controls->firstMouse = false;
+//		controls->prevMouseX = mouseX;
+//		controls->prevMouseY = mouseY;
+//	}
+//
+//	//Get mouse position delta for this frame
+//	float mouseDeltaX = (mouseX - controls->prevMouseX) * controls->mouseSensitivity;
+//	float mouseDeltaY = (mouseY - controls->prevMouseY) * controls->mouseSensitivity;
+//	//Add to yaw and pitch
+//	controls->yaw += mouseDeltaX;
+//	controls->pitch -= mouseDeltaY;
+//	//Clamp pitch between -89 and 89 degrees
+//	controls->pitch = wr::clamp(controls->pitch, -89, 89);
+//
+//	//Remember previous mouse position
+//	controls->prevMouseX = mouseX;
+//	controls->prevMouseY = mouseY;
+//
+//	ew::Vec3 forward(ew::Radians(controls->yaw), ew::Radians(controls->pitch), 0);
+//
+//	camera->target = camera->position + forward;
+//}
